@@ -1,26 +1,30 @@
-/*
- * This file is part of htmlMaze	.
- *
- * htmlMaze is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * htmlMaze is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with htmlMaze.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 * {
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', sans-serif;
+  background-color: #000;
+  color:#fff;
   text-align: center;
+  transition: all 500ms;
 }
 
-table, tbody, tr, td {
+.container {
+  max-width: 800px;
+  margin:auto;
+}
+
+.prompt {
+  max-width: 800px;
+  width: 80vw;
+  bottom: 10vh;
+  position: absolute;
+}
+
+h2 {
+  font-weight: 900;
+}
+
+h3 {
+  font-weight: 500;
+  font-size: 1rem;
   text-align: left;
 }
 
@@ -31,8 +35,34 @@ table, tbody, tr, td {
   right: 25px;
 }
 
-#settings {
-  position: absolute;
-  right: 25px;
-  top: 25px;
+input {
+  background-color: #343434;
+  width:calc(75vw - 3rem);
+  max-width: calc(750px - 3rem);
+  padding: 0.75rem 1.5rem;
+  font-size: 1.25rem;
+  text-align: left;
+  border-radius: 10px;
+  border-width: 0;
+  font-family: "Source Code Pro";
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  display: inline;
+}
+
+#counter {
+  background-color: #337DFF;
+  font-family: "Source Code Pro";
+  width: calc(5vw - 3rem);
+  display: inline;
+  max-width: calc(50px - 3rem);
+  padding: 0.75rem 1rem;
+  font-size: 1.25rem;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+*:focus {
+  outline: none;
+  /*box-shadow: 0px 0px 0px 4px #337DFF;*/
 }

@@ -1,26 +1,14 @@
-/*
- * This file is part of htmlMaze	.
- *
- * htmlMaze is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * htmlMaze is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with htmlMaze.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 let ctx;
 let canvas;
 let maze;
 let mazeHeight;
 let mazeWidth;
 let player;
+let image;
+let debug = false;
+let promptsTaken = 0;
+let input;
+let counter;
 
 class Player {
 
@@ -51,13 +39,14 @@ class Maze {
 
   constructor(cols, rows, cellSize) {
 
-    this.backgroundColor = "#ffffff";
+    this.backgroundColor = "#000";
     this.cols = cols;
-    this.endColor = "#88FF88";
-    this.mazeColor = "#000000";
+    this.endColor = "#11AC7B";
+    this.mazeColor = "#99BEFF";
     this.playerColor = "#880088";
     this.rows = rows;
     this.cellSize = cellSize;
+    this.lineWidth = 5;
 
     this.cells = [];
 
@@ -167,15 +156,17 @@ class Maze {
   }
 
   redraw() {
-
     ctx.fillStyle = this.backgroundColor;
-    ctx.fillRect(0, 0, mazeHeight, mazeWidth);
+    ctx.fillRect(0, 0, this.cols * this.cellSize, this.rows * this.cellSize);
+    console.log(this.mazeHeight, this.mazeWidth)
 
     ctx.fillStyle = this.endColor;
     ctx.fillRect((this.cols - 1) * this.cellSize, (this.rows - 1) * this.cellSize, this.cellSize, this.cellSize);
 
     ctx.strokeStyle = this.mazeColor;
+    ctx.lineWidth = this.lineWidth;
     ctx.strokeRect(0, 0, mazeHeight, mazeWidth);
+    ctx.lineWidth = this.lineWidth/2;
 
     for (let col = 0; col < this.cols; col++) {
       for (let row = 0; row < this.rows; row++) {
@@ -206,17 +197,10 @@ class Maze {
       }
     }
 
-    ctx.fillStyle = this.playerColor;
-    ctx.fillRect((player.col * this.cellSize) + 2, (player.row * this.cellSize) + 2, this.cellSize - 4, this.cellSize - 4);
+    ctx.drawImage(image,(player.col * this.cellSize) + 2, (player.row * this.cellSize) + 2, this.cellSize - 4, this.cellSize - 4);
 
   }
 
-}
-
-function onClick(event) {
-  maze.cols = document.getElementById("cols").value;
-  maze.rows = document.getElementById("rows").value;
-  maze.generate();
 }
 
 function onKeyDown(event) {
@@ -251,15 +235,28 @@ function onKeyDown(event) {
   maze.redraw();
 }
 
+async function submitPrompt(event) {
+  if (event.key === "Enter" || event.keyCode === 13) {
+    promptsTaken += 1
+    counter.textContent = promptsTaken.toString();
+    await getResponse(input.value)
+  }
+}
+
 function onLoad() {
 
   canvas = document.getElementById("mainForm");
   ctx = canvas.getContext("2d");
 
+  image = document.getElementById("source")
+  input = document.getElementById("input")
+  counter = document.getElementById("counter")
+
   player = new Player();
-  maze = new Maze(20, 20, 25);
+  maze = new Maze(5, 5, 100);
+  input.addEventListener("keyup", submitPrompt);
 
-  document.addEventListener("keydown", onKeyDown);
-  document.getElementById("generate").addEventListener("click", onClick);
-
+  if (debug){
+    document.addEventListener("keydown", onKeyDown);
+  }
 }
