@@ -10,6 +10,8 @@ let promptsTaken = 0;
 let input;
 let counter;
 
+const SERVER_URL = "http://localhost:8000"
+
 class Player {
 
   constructor() {
@@ -204,6 +206,7 @@ class Maze {
 }
 
 function onKeyDown(event) {
+  if (debug) {
   switch (event.keyCode) {
     case 37:
     case 65:
@@ -232,6 +235,7 @@ function onKeyDown(event) {
     default:
       break;
   }
+}
   maze.redraw();
 }
 
@@ -240,6 +244,54 @@ async function submitPrompt(event) {
     promptsTaken += 1
     counter.textContent = promptsTaken.toString();
     await getResponse(input.value)
+  }
+}
+
+async function getResponse(prompt) {
+  const response = await fetch( `${SERVER_URL}/get-movement`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({prompt: prompt})
+  });
+  const data = await response.json();
+  input.value = "";
+
+
+  if (data.response && data.key) {
+  
+    console.log(data.response)
+    console.log(data.key)
+    if (data.key === "left") {
+      if (!maze.cells[player.col][player.row].westWall) {
+        player.col -= 1;
+      }
+    } else if (data.key === "right") {
+      if (!maze.cells[player.col][player.row].eastWall) {
+        player.col += 1;
+      }
+    } else if (data.key === "down") {
+      if (!maze.cells[player.col][player.row].southWall) {
+        player.row += 1;
+      }
+    } else if (data.key === "up") {
+      if (!maze.cells[player.col][player.row].northWall) {
+        player.row -= 1;
+      }
+    }
+
+    checkIfWon();
+  } else {
+    console.log("No response or key");
+  }
+  maze.redraw();
+}
+
+function checkIfWon() {
+  if (player.col === maze.cols - 1 && player.row === maze.rows - 1) {
+    // show win message and modal
+    console.log("You win!")
   }
 }
 
@@ -256,7 +308,5 @@ function onLoad() {
   maze = new Maze(5, 5, 100);
   input.addEventListener("keyup", submitPrompt);
 
-  if (debug){
-    document.addEventListener("keydown", onKeyDown);
-  }
+  document.addEventListener("keydown", onKeyDown);
 }
