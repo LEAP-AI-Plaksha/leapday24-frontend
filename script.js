@@ -239,6 +239,9 @@ function submitPrompt(event) {
       return;
     }
     promptsTaken += 1;
+	  if (promptsTaken % 29 == 0) {
+	  	promptsTaken = 0;
+	  }
     counter.textContent = promptsTaken.toString();
     getResponse(input.value);
 
