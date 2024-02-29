@@ -170,7 +170,6 @@ class Maze {
   redraw() {
     ctx.fillStyle = this.backgroundColor;
     ctx.fillRect(0, 0, this.cols * this.cellSize, this.rows * this.cellSize);
-    console.log(this.mazeHeight, this.mazeWidth);
 
     ctx.fillStyle = this.endColor;
     ctx.fillRect(
@@ -258,107 +257,136 @@ function onKeyDown(event) {
   maze.redraw();
 }
 
-async function submitPrompt(event) {
+function submitPrompt(event) {
   if (event.key === "Enter" || event.keyCode === 13) {
     if (input.value === "") {
       return;
     }
     promptsTaken += 1;
     counter.textContent = promptsTaken.toString();
-    await getResponse(input.value);
+    getResponse(input.value);
   }
 }
 
-async function getResponse(prompt) {
-  const response = await fetch(`${SERVER_URL}/api/get-movement`, {
+function getResponse(prompt) {
+  // DEBUG ONLY:
+  var myModal = new bootstrap.Modal(document.getElementById("exampleModal"));
+  var innerText = document.getElementById("modalInnerText");
+  innerText.innerHTML = `Congratulations! You have completed the maze in ${promptsTaken} prompts!`;
+  myModal.toggle();
+
+  var respWaitSpinner = document.getElementById("respWaitSpinner");
+  respWaitSpinner.classList.remove("d-none");
+
+  input.value = "";
+
+  fetch(`${SERVER_URL}/api/get-movement/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Api-Key ${myToken}`,
+      Authorization: `Api-Key ${myToken}`,
     },
     body: JSON.stringify({ prompt: prompt }),
+  }).then((resp) => {
+    resp.json().then((data) => {
+      console.log(data);
+      if (data.message && data.key) {
+        console.log(data.message);
+        console.log(data.key);
+
+        var respElement = document.getElementById("response");
+        respElement.textContent = data.message;
+        var respWaitSpinner = document.getElementById("respWaitSpinner");
+        respWaitSpinner.classList.add("d-none");
+
+        if (data.key === "left") {
+          if (!maze.cells[player.col][player.row].westWall) {
+            player.col -= 1;
+          }
+        } else if (data.key === "right") {
+          if (!maze.cells[player.col][player.row].eastWall) {
+            player.col += 1;
+          }
+        } else if (data.key === "down") {
+          if (!maze.cells[player.col][player.row].southWall) {
+            player.row += 1;
+          }
+        } else if (data.key === "up") {
+          if (!maze.cells[player.col][player.row].northWall) {
+            player.row -= 1;
+          }
+        } else if (data.key === "denied") {
+          console.log("Denied");
+        }
+
+        checkIfWon();
+      } else {
+        console.log("No response or key");
+      }
+    });
   });
-  const data = await response.json();
-  input.value = "";
-
-  if (data.response && data.key) {
-    console.log(data.response);
-    console.log(data.key);
-
-    var respElement = document.getElementById("response");
-    respElement.textContent = data.response;
-
-    if (data.key === "left") {
-      if (!maze.cells[player.col][player.row].westWall) {
-        player.col -= 1;
-      }
-    } else if (data.key === "right") {
-      if (!maze.cells[player.col][player.row].eastWall) {
-        player.col += 1;
-      }
-    } else if (data.key === "down") {
-      if (!maze.cells[player.col][player.row].southWall) {
-        player.row += 1;
-      }
-    } else if (data.key === "up") {
-      if (!maze.cells[player.col][player.row].northWall) {
-        player.row -= 1;
-      }
-    } else if (data.key === "denied") {
-      console.log("Denied");
-    }
-
-    checkIfWon();
-  } else {
-    console.log("No response or key");
-  }
   maze.redraw();
 }
 
 async function checkIfWon() {
   if (player.col === maze.cols - 1 && player.row === maze.rows - 1) {
     // show win message and modal
-    var myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
+    var myModal = new bootstrap.Modal(document.getElementById("exampleModal"));
+    var innerText = document.getElementById("modalInnerText");
+    innerText.innerHTML = `Congratulations! You have completed the maze in ${promptsTaken} prompt(s)!`;
     myModal.toggle();
-    console.log("triggered");
-
-    const response = await fetch(`${SERVER_URL}/api/leaderboard`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Api-Key ${myToken}`,
-
-      },
-      body: JSON.stringify({ username: username, num_tries: promptsTaken}),
-    });
-    const data = await response.json();
-    console.log(data);
   }
 }
 
 function showLeaderboard() {
-
   document.getElementById("leaderboardSpinner").classList.remove("d-none");
 
-  const response = fetch(`${SERVER_URL}/api/leaderboard`, {
+  const response = fetch(`${SERVER_URL}/api/leaderboard/`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Api-Key ${myToken}`,
+      Authorization: `Api-Key ${myToken}`,
     },
   });
   response.then((resp) => {
+    console.log(resp);
     document.getElementById("leaderboardSpinner").classList.add("d-none");
     var respJson = resp.json().then((data) => {
-      console.log(respJson);  
-      if (respJson.length > 0) {
-        console.log(respJson);
+      console.log(data);
+      if (data.length > 0) {
+        console.log(data);
+        var leaderboardTable = document.getElementById("leaderboardTable");
+        var tableBody = leaderboardTable.getElementsByTagName("tbody")[0];
+        data.forEach((element) => {
+          var newRow = tableBody.insertRow(tableBody.rows.length);
+          var cell1 = newRow.insertCell(0);
+          var cell2 = newRow.insertCell(1);
+          var cell3 = newRow.insertCell(2);
+          cell1.innerHTML = element.username;
+          cell2.innerHTML = element.num_tries;
+          cell3.innerHTML = new Date(element.created_at).toTimeString().split(" ")[0];
+        });
         document.getElementById("leaderboard").classList.remove("d-none");
       } else {
         console.log("No response");
         document.getElementById("leaderboardNone").classList.remove("d-none");
       }
     });
+  });
+}
+
+function submitScore() {
+  var username = document.getElementById("recipient-name").value;
+  console.log("SAVING RESPONSE!!");
+  fetch(`${SERVER_URL}/api/leaderboard/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Api-Key ${myToken}`,
+    },
+    body: JSON.stringify({ username: username, num_tries: promptsTaken }),
+  }).then((resp) => {
+    console.log(resp);
   });
 }
 

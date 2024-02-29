@@ -35,13 +35,16 @@
           </p>
           <br>
           <p class="fs-6">
-          Only one small problem, because Pranjal's lineage is that of shakespeare's, he only understands commands
-          written in shakespearean english, lead him to his computer with the least number of prompts to win! (same
-          prompts cannot be used again and again!)</p>
+            Only one small problem, because Pranjal's lineage is that of shakespeare's, he only understands commands
+            written in shakespearean english, lead him to his computer with the least number of prompts to win! (same
+            prompts cannot be used again and again!)</p>
         </div>
-
-        <div class="text-secondary" id="response">Test</div>
-
+        <div class="d-flex flex-row justify-content-between align-items-center">
+          <div class="text-secondary" id="response">No prompts sent yet...</div>
+          <div id="respWaitSpinner" class="spinner-border text-primary d-none" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
         <div class="input-group my-3">
           <span class="input-group-text font-sourcecode border-dark text-white" id="counter">0</span>
           <input id="inputElement" type="text" class="form-control bg-dark text-white border-dark"
@@ -58,7 +61,8 @@
           <img id="source" src="./pjr.png" width="125" height="125" />
         </div>
 
-        <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample" onclick="showLeaderboard();">View Leaderboard</button>
+        <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample"
+          aria-controls="offcanvasExample" onclick="showLeaderboard();">View Leaderboard</button>
       </div>
     </div>
 
@@ -73,31 +77,43 @@
     </div>
   </div>
 
-  <div class="modal fade" id="exampleModal" tabindex="-1">
+  <div class="modal" id="exampleModal" tabindex="-1">
     <div class="modal-dialog">
-      <div class="modal-content">
+      <div class="modal-content bg-dark text-white">
         <div class="modal-header">
-          <h5 class="modal-title">Modal title</h5>
+          <h5 class="modal-title">Submit your Result!</h5>
         </div>
         <div class="modal-body">
-          <p>Modal body text goe.</p>
+          <p id="modalInnerText">You have completed the maze!</p>
+          <form>
+            <div class="mb-3">
+              <label for="recipient-name" class="col-form-label">Your Name:</label>
+              <input type="text" class="form-control" id="recipient-name">
+            </div>
+          </form>
+
+          <p><small>If you place on top of the leaderboard, you get a chocolate from team LEAP! Happy LEAP Day!</small>
+          </p>
+
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Submit!</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="submitScore();">Submit
+            Score!</button>
         </div>
       </div>
     </div>
 
   </div>
-  
-  <div class="offcanvas offcanvas-end bg-black text-white" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+
+  <div class="offcanvas offcanvas-end bg-black text-white" tabindex="-1" id="offcanvasExample"
+    aria-labelledby="offcanvasExampleLabel">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="offcanvasExampleLabel">Leaderboard</h5>
       <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
       <div class="d-flex flex-row text-center align-items-center justify-content-center h-75">
-        
+
         <div id="leaderboardSpinner" class="d-none">
           <div class="spinner-grow" role="status">
             <span class="visually-hidden">Loading...</span>
@@ -105,9 +121,20 @@
         </div>
 
         <div id="leaderboard" class="d-none">
-          <div class="spinner-grow text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
+
+          <table id="leaderboardTable"
+            class="table table-dark table-striped">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Score</th>
+                <th scope="col">Time Submitted (24h)</th>
+              </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+          </table>
         </div>
 
         <div id="leaderboardNone" class="d-none">
