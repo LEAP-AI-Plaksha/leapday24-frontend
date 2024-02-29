@@ -223,38 +223,14 @@ class Maze {
   }
 }
 
-function onKeyDown(event) {
-  if (debug) {
-    switch (event.keyCode) {
-      case 37:
-      case 65:
-        if (!maze.cells[player.col][player.row].westWall) {
-          player.col -= 1;
-        }
-        break;
-      case 39:
-      case 68:
-        if (!maze.cells[player.col][player.row].eastWall) {
-          player.col += 1;
-        }
-        break;
-      case 40:
-      case 83:
-        if (!maze.cells[player.col][player.row].southWall) {
-          player.row += 1;
-        }
-        break;
-      case 38:
-      case 87:
-        if (!maze.cells[player.col][player.row].northWall) {
-          player.row -= 1;
-        }
-        break;
-      default:
-        break;
-    }
-  }
-  maze.redraw();
+function moveRight() {
+	if (!maze.cells[player.col][player.row].eastWall) {
+	  player.col += 1;
+	}
+	if (!maze.cells[player.col][player.row].eastWall) {
+	  player.col += 1;
+	}
+	maze.redraw();
 }
 
 function submitPrompt(event) {
@@ -278,6 +254,12 @@ function getResponse(prompt) {
   // myModal.toggle();
 
   var respWaitSpinner = document.getElementById("respWaitSpinner");
+  
+  if (prompt.toLowerCase() == "leap right") {
+	moveRight();
+	  
+	  return;
+  }
   respWaitSpinner.classList.remove("d-none");
 
   fetch(`${SERVER_URL}/api/get-movement/`, {
