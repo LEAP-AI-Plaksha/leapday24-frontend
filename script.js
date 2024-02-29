@@ -270,7 +270,7 @@ async function submitPrompt(event) {
 }
 
 async function getResponse(prompt) {
-  const response = await fetch(`${SERVER_URL}/get-movement`, {
+  const response = await fetch(`${SERVER_URL}/api/get-movement`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -284,6 +284,10 @@ async function getResponse(prompt) {
   if (data.response && data.key) {
     console.log(data.response);
     console.log(data.key);
+
+    var respElement = document.getElementById("response");
+    respElement.textContent = data.response;
+
     if (data.key === "left") {
       if (!maze.cells[player.col][player.row].westWall) {
         player.col -= 1;
@@ -318,7 +322,7 @@ async function checkIfWon() {
     myModal.toggle();
     console.log("triggered");
 
-    const response = await fetch(`${SERVER_URL}/leaderboard`, {
+    const response = await fetch(`${SERVER_URL}/api/leaderboard`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -336,24 +340,26 @@ function showLeaderboard() {
 
   document.getElementById("leaderboardSpinner").classList.remove("d-none");
 
-  const response = fetch(`${SERVER_URL}/leaderboard`, {
+  const response = fetch(`${SERVER_URL}/api/leaderboard`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Api-Key ${myToken}`,
     },
   });
-  
-  document.getElementById("leaderboardSpinner").classList.add("d-none");
-
-  var respJson = response.json();
-  if (respJson) {
-    console.log(respJson);
-    document.getElementById("leaderboard").classList.remove("d-none");
-  } else {
-    console.log("No response");
-    document.getElementById("leaderboardNone").classList.remove("d-none");
-  }
+  response.then((resp) => {
+    document.getElementById("leaderboardSpinner").classList.add("d-none");
+    var respJson = resp.json().then((data) => {
+      console.log(respJson);  
+      if (respJson.length > 0) {
+        console.log(respJson);
+        document.getElementById("leaderboard").classList.remove("d-none");
+      } else {
+        console.log("No response");
+        document.getElementById("leaderboardNone").classList.remove("d-none");
+      }
+    });
+  });
 }
 
 function onLoad() {
