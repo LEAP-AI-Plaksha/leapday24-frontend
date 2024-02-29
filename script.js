@@ -11,7 +11,7 @@ let input;
 let counter;
 let myToken = "nMrYlyKC.SHxH1R6j1VJ5Ohlq19PB5sZGYIm4nlHA";
 
-const SERVER_URL = "https://ffad-2a09-bac5-3ae8-a8c-00-10d-19.ngrok-free.app";
+const SERVER_URL = "https://leapdayapi.thepjr.com";
 
 class Player {
   constructor() {
