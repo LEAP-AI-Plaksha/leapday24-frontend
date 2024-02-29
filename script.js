@@ -270,10 +270,10 @@ function submitPrompt(event) {
 
 function getResponse(prompt) {
   // DEBUG ONLY:
-  var myModal = new bootstrap.Modal(document.getElementById("exampleModal"));
-  var innerText = document.getElementById("modalInnerText");
-  innerText.innerHTML = `Congratulations! You have completed the maze in ${promptsTaken} prompts!`;
-  myModal.toggle();
+  // var myModal = new bootstrap.Modal(document.getElementById("exampleModal"));
+  // var innerText = document.getElementById("modalInnerText");
+  // innerText.innerHTML = `Congratulations! You have completed the maze in ${promptsTaken} prompts!`;
+  // myModal.toggle();
 
   var respWaitSpinner = document.getElementById("respWaitSpinner");
   respWaitSpinner.classList.remove("d-none");
@@ -287,44 +287,51 @@ function getResponse(prompt) {
       Authorization: `Api-Key ${myToken}`,
     },
     body: JSON.stringify({ prompt: prompt }),
-  }).then((resp) => {
-    resp.json().then((data) => {
-      console.log(data);
-      if (data.message && data.key) {
-        console.log(data.message);
-        console.log(data.key);
+  })
+    .then((resp) => {
+      resp.json().then((data) => {
+        console.log(data);
+        if (data.message && data.key) {
+          console.log(data.message);
+          console.log(data.key);
 
-        var respElement = document.getElementById("response");
-        respElement.textContent = data.message;
-        var respWaitSpinner = document.getElementById("respWaitSpinner");
-        respWaitSpinner.classList.add("d-none");
+          var respElement = document.getElementById("response");
+          respElement.textContent = data.message;
+          var respWaitSpinner = document.getElementById("respWaitSpinner");
+          respWaitSpinner.classList.add("d-none");
 
-        if (data.key === "left") {
-          if (!maze.cells[player.col][player.row].westWall) {
-            player.col -= 1;
+          if (data.key === "left") {
+            if (!maze.cells[player.col][player.row].westWall) {
+              player.col -= 1;
+            }
+          } else if (data.key === "right") {
+            if (!maze.cells[player.col][player.row].eastWall) {
+              player.col += 1;
+            }
+          } else if (data.key === "down") {
+            if (!maze.cells[player.col][player.row].southWall) {
+              player.row += 1;
+            }
+          } else if (data.key === "up") {
+            if (!maze.cells[player.col][player.row].northWall) {
+              player.row -= 1;
+            }
+          } else if (data.key === "denied") {
+            console.log("Denied");
           }
-        } else if (data.key === "right") {
-          if (!maze.cells[player.col][player.row].eastWall) {
-            player.col += 1;
-          }
-        } else if (data.key === "down") {
-          if (!maze.cells[player.col][player.row].southWall) {
-            player.row += 1;
-          }
-        } else if (data.key === "up") {
-          if (!maze.cells[player.col][player.row].northWall) {
-            player.row -= 1;
-          }
-        } else if (data.key === "denied") {
-          console.log("Denied");
+
+          checkIfWon();
+        } else {
+          console.log("No response or key");
         }
-
-        checkIfWon();
-      } else {
-        console.log("No response or key");
-      }
+      });
+    })
+    .catch((err) => {
+      var respWaitSpinner = document.getElementById("respWaitSpinner");
+      respWaitSpinner.classList.add("d-none");
+      var respElement = document.getElementById("response");
+      respElement.textContent = "Network error. Please try again later!";
     });
-  });
   maze.redraw();
 }
 
@@ -364,7 +371,9 @@ function showLeaderboard() {
           var cell3 = newRow.insertCell(2);
           cell1.innerHTML = element.username;
           cell2.innerHTML = element.num_tries;
-          cell3.innerHTML = new Date(element.created_at).toTimeString().split(" ")[0];
+          cell3.innerHTML = new Date(element.created_at)
+            .toTimeString()
+            .split(" ")[0];
         });
         document.getElementById("leaderboard").classList.remove("d-none");
       } else {
