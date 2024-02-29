@@ -9,6 +9,7 @@ let debug = false;
 let promptsTaken = 0;
 let input;
 let counter;
+let myToken = "nMrYlyKC.SHxH1R6j1VJ5Ohlq19PB5sZGYIm4nlHA";
 
 const SERVER_URL = "http://localhost:8000";
 
@@ -259,6 +260,9 @@ function onKeyDown(event) {
 
 async function submitPrompt(event) {
   if (event.key === "Enter" || event.keyCode === 13) {
+    if (input.value === "") {
+      return;
+    }
     promptsTaken += 1;
     counter.textContent = promptsTaken.toString();
     await getResponse(input.value);
@@ -270,6 +274,7 @@ async function getResponse(prompt) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "Authorization": `Api-Key ${myToken}`,
     },
     body: JSON.stringify({ prompt: prompt }),
   });
@@ -309,12 +314,16 @@ async function getResponse(prompt) {
 async function checkIfWon() {
   if (player.col === maze.cols - 1 && player.row === maze.rows - 1) {
     // show win message and modal
-    
+    var myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
+    myModal.toggle();
+    console.log("triggered");
 
     const response = await fetch(`${SERVER_URL}/leaderboard`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Api-Key ${myToken}`,
+
       },
       body: JSON.stringify({ username: username, num_tries: promptsTaken}),
     });
@@ -323,16 +332,41 @@ async function checkIfWon() {
   }
 }
 
+function showLeaderboard() {
+
+  document.getElementById("leaderboardSpinner").classList.remove("d-none");
+
+  const response = fetch(`${SERVER_URL}/leaderboard`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Api-Key ${myToken}`,
+    },
+  });
+  
+  document.getElementById("leaderboardSpinner").classList.add("d-none");
+
+  var respJson = response.json();
+  if (respJson) {
+    console.log(respJson);
+    document.getElementById("leaderboard").classList.remove("d-none");
+  } else {
+    console.log("No response");
+    document.getElementById("leaderboardNone").classList.remove("d-none");
+  }
+}
+
 function onLoad() {
   canvas = document.getElementById("mainForm");
   ctx = canvas.getContext("2d");
 
   image = document.getElementById("source");
-  input = document.getElementById("input");
+  input = document.getElementById("inputElement");
   counter = document.getElementById("counter");
 
   player = new Player();
-  maze = new Maze(5, 5, 100);
+  maze = new Maze(5, 5, 90);
+
   input.addEventListener("keyup", submitPrompt);
 
   document.addEventListener("keydown", onKeyDown);
