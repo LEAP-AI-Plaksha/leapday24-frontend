@@ -11,7 +11,7 @@ let input;
 let counter;
 let myToken = "nMrYlyKC.SHxH1R6j1VJ5Ohlq19PB5sZGYIm4nlHA";
 
-const SERVER_URL = "https://ffad-2a09-bac5-3ae8-a8c-00-10d-19.ngrok-free.app/";
+const SERVER_URL = "https://ffad-2a09-bac5-3ae8-a8c-00-10d-19.ngrok-free.app";
 
 class Player {
   constructor() {
@@ -265,6 +265,8 @@ function submitPrompt(event) {
     promptsTaken += 1;
     counter.textContent = promptsTaken.toString();
     getResponse(input.value);
+
+    input.value = "";
   }
 }
 
@@ -278,8 +280,6 @@ function getResponse(prompt) {
   var respWaitSpinner = document.getElementById("respWaitSpinner");
   respWaitSpinner.classList.remove("d-none");
 
-  input.value = "";
-
   fetch(`${SERVER_URL}/api/get-movement/`, {
     method: "POST",
     headers: {
@@ -290,50 +290,53 @@ function getResponse(prompt) {
   })
     .then((resp) => resp.json())
     .then((data) => {
-        console.log(data);
-        if (data.message && data.key) {
-          console.log(data.message);
-          console.log(data.key);
+      // console.log(data);
+      if (data.message && data.key) {
+        // console.log(data.message);
+        // console.log(data.key);
 
-          var respElement = document.getElementById("response");
-          respElement.textContent = data.message;
-          var respWaitSpinner = document.getElementById("respWaitSpinner");
-          respWaitSpinner.classList.add("d-none");
+        var respElement = document.getElementById("response");
+        respElement.textContent = data.message;
+        var respWaitSpinner = document.getElementById("respWaitSpinner");
+        respWaitSpinner.classList.add("d-none");
 
-          if (data.key == "left") {
-            if (!maze.cells[player.col][player.row].westWall) {
-              player.col -= 1;
-            }
-          } else if (data.key == "right") {
-            if (!maze.cells[player.col][player.row].eastWall) {
-              player.col += 1;
-            }
-          } else if (data.key == "down") {
-            console.log("downing")
-            if (!maze.cells[player.col][player.row].southWall) {
-              console.log("downed")
-              player.row += 1;
-            }
-          } else if (data.key == "up") {
-            if (!maze.cells[player.col][player.row].northWall) {
-              player.row -= 1;
-            }
-          } else if (data.key == "denied") {
-            console.log("Denied");
+        if (data.key == "left") {
+          if (!maze.cells[player.col][player.row].westWall) {
+            player.col -= 1;
           }
-
-          checkIfWon();
-        } else {
-          console.log("No response or key");
+        } else if (data.key == "right") {
+          if (!maze.cells[player.col][player.row].eastWall) {
+            player.col += 1;
+          }
+        } else if (data.key == "down") {
+          // console.log("downing");
+          if (!maze.cells[player.col][player.row].southWall) {
+            // console.log("downed");
+            player.row += 1;
+          }
+        } else if (data.key == "up") {
+          if (!maze.cells[player.col][player.row].northWall) {
+            player.row -= 1;
+          }
+        } else if (data.key == "denied") {
+          console.log("Denied");
         }
+
+        checkIfWon();
+      } else {
+        console.log("No response or key");
+      }
     })
     .catch((err) => {
       var respWaitSpinner = document.getElementById("respWaitSpinner");
       respWaitSpinner.classList.add("d-none");
       var respElement = document.getElementById("response");
       respElement.textContent = "Network error. Please try again later!";
+
+      promptsTaken -= 1;
+      counter.textContent = promptsTaken.toString();
     })
-    .finally(() => maze.redraw())
+    .finally(() => maze.redraw());
 }
 
 async function checkIfWon() {
@@ -356,42 +359,49 @@ function showLeaderboard() {
       Authorization: `Api-Key ${myToken}`,
     },
   });
-  response.then((resp) => {
-    console.log(resp);
-    document.getElementById("leaderboardSpinner").classList.add("d-none");
-    resp.json().then((data) => {
-      console.log(data);
-      if (data.length > 0) {
-        console.log(data);
-        var leaderboardTable = document.getElementById("leaderboardTable");
-        var tableBody = leaderboardTable.getElementsByTagName("tbody")[0];
-        tableBody.innerHTML = ""
-        data.forEach((element) => {
-          var newRow = tableBody.insertRow(tableBody.rows.length);
-          var cell1 = newRow.insertCell(0);
-          var cell2 = newRow.insertCell(1);
-          var cell3 = newRow.insertCell(2);
-          cell1.innerHTML = element.username;
-          cell2.innerHTML = element.num_tries;
-          cell3.innerHTML = new Date(element.created_at)
-            .toTimeString()
-            .split(" ")[0];
-        });
-        document.getElementById("leaderboard").classList.remove("d-none");
-      } else {
-        console.log("No response");
-        document.getElementById("leaderboardNone").classList.remove("d-none");
-      }
+  response
+    .then((resp) => {
+      // console.log(resp);
+      document.getElementById("leaderboardSpinner").classList.add("d-none");
+      document.getElementById("leaderboardNone").classList.add("d-none");
+      document.getElementById("leaderboard").classList.add("d-none");
+      resp.json().then((data) => {
+        // console.log(data);
+        if (data.length > 0) {
+          // console.log(data);
+          var leaderboardTable = document.getElementById("leaderboardTable");
+          var tableBody = leaderboardTable.getElementsByTagName("tbody")[0];
+          tableBody.innerHTML = "";
+          data.forEach((element) => {
+            var newRow = tableBody.insertRow(tableBody.rows.length);
+            var cell1 = newRow.insertCell(0);
+            var cell2 = newRow.insertCell(1);
+            var cell3 = newRow.insertCell(2);
+            cell1.innerHTML = element.username;
+            cell2.innerHTML = element.num_tries;
+            cell3.innerHTML = new Date(element.created_at)
+              .toTimeString()
+              .split(" ")[0];
+          });
+
+          document.getElementById("leaderboard").classList.remove("d-none");
+        } else {
+          console.log("No response");
+          document.getElementById("leaderboardNone").classList.remove("d-none");
+          document.getElementById("leaderboard").classList.add("d-none");
+        }
+      });
+    })
+    .catch(() => {
+      document.getElementById("leaderboardSpinner").classList.add("d-none");
+      document.getElementById("leaderboard").classList.add("d-none");
+
+      document.getElementById("leaderboardNone").classList.remove("d-none");
     });
-  })
-  .catch(() => {
-    alert("Either you have no internet connection or our site broke :p")
-  });
 }
 
 function submitScore() {
   var username = document.getElementById("recipient-name").value;
-  console.log("SAVING RESPONSE!!");
   fetch(`${SERVER_URL}/api/leaderboard/`, {
     method: "POST",
     headers: {
@@ -399,10 +409,15 @@ function submitScore() {
       Authorization: `Api-Key ${myToken}`,
     },
     body: JSON.stringify({ username: username, num_tries: promptsTaken }),
-  }).then((resp) => {
-    console.log(resp);
   })
-  .catch(() => {alert("Either you have no internet connection or our site broke :p")});
+    .then((resp) => {
+      console.log(resp);
+    })
+    .catch(() => {
+      alert(
+        "Could not save response. Either you have no internet connection or our site broke :p. Oops!"
+      );
+    });
 }
 
 function onLoad() {
@@ -414,7 +429,7 @@ function onLoad() {
   counter = document.getElementById("counter");
 
   player = new Player();
-  maze = new Maze(3, 3, 175);
+  maze = new Maze(3, 3, 150);
 
   input.addEventListener("keyup", submitPrompt);
 
