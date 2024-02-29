@@ -429,7 +429,7 @@ function onLoad() {
   counter = document.getElementById("counter");
 
   player = new Player();
-  maze = new Maze(3, 3, 150);
+  maze = new Maze(4, 4, 90);
 
   input.addEventListener("keyup", submitPrompt);
 

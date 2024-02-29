@@ -12,21 +12,6 @@
   font-family: "Source Code Pro";
 }
 
-.custominput {
-  background-color: #343434;
-  width:calc(75vw - 3rem);
-  max-width: calc(750px - 3rem);
-  padding: 0.75rem 1.5rem;
-  font-size: 1.25rem;
-  text-align: left;
-  border-radius: 10px;
-  border-width: 0;
-  font-family: "Source Code Pro";
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  display: inline;
-}
-
 #counter {
   background-color: #337DFF;
 }
@@ -38,4 +23,9 @@
 
 .customtext {
   max-width: calc(750px - 3rem);
+}
+
+.cust-inp::placeholder {
+  color: #6c757d !Important;
+  opacity: 1;
 }
